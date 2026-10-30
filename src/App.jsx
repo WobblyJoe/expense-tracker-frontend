@@ -4,7 +4,15 @@ import API from "./api";
 import "./App.css";
 
 function App() {
-  const today = new Date().toISOString().split("T")[0];
+  const getToday = () => {
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    return new Date(now.getTime() - offset)
+      .toISOString()
+      .split("T")[0];
+  };
+
+  const today = getToday();
 
   const [expenses, setExpenses] = useState([]);
   const [title, setTitle] = useState("");
@@ -16,14 +24,26 @@ function App() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const categories = [
+    "Food",
+    "Travel",
+    "Shopping",
+    "Bills",
+    "Health",
+    "Other",
+  ];
+
   const fetchExpenses = async () => {
     try {
       setLoading(true);
-      const response = await API.get("/");
+
+      // FIX: No trailing slash
+      const response = await API.get("");
+
       setExpenses(response.data);
     } catch (error) {
+      console.error("Fetch error:", error);
       setMessage("Unable to load expenses. Please try again.");
-      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -46,6 +66,14 @@ function App() {
             expense.category.toLowerCase() === filter.toLowerCase()
         );
 
+  const resetForm = () => {
+    setTitle("");
+    setAmount("");
+    setCategory("Food");
+    setDate(getToday());
+    setEditingId(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -64,26 +92,25 @@ function App() {
     try {
       setLoading(true);
 
-      if (editingId) {
+      if (editingId !== null) {
         await API.put(`/${editingId}`, expense);
         setMessage("Expense updated successfully!");
       } else {
-        await API.post("/", expense);
+        // FIX: No trailing slash
+        await API.post("", expense);
         setMessage("Expense added successfully!");
       }
 
-      setTitle("");
-      setAmount("");
-      setCategory("Food");
-      setDate(today);
-      setEditingId(null);
+      resetForm();
 
-      await fetchExpenses();
+      const response = await API.get("");
+      setExpenses(response.data);
     } catch (error) {
+      console.error("Save error:", error);
       setMessage(
-        error.response?.data?.message || "Something went wrong!"
+        error.response?.data?.message ||
+          "Something went wrong!"
       );
-      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -91,51 +118,63 @@ function App() {
 
   const handleEdit = (expense) => {
     setTitle(expense.title);
-    setAmount(expense.amount);
+    setAmount(String(expense.amount));
     setCategory(expense.category);
     setDate(expense.date);
     setEditingId(expense.id);
+    setMessage("");
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this expense?")) {
+    if (!window.confirm("Delete this expense?")) {
       return;
     }
 
     try {
+      setLoading(true);
+
       await API.delete(`/${id}`);
+
+      const response = await API.get("");
+      setExpenses(response.data);
+
+      if (editingId === id) {
+        resetForm();
+      }
+
       setMessage("Expense deleted successfully!");
-      await fetchExpenses();
     } catch (error) {
+      console.error("Delete error:", error);
       setMessage("Unable to delete expense.");
-      console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const cancelEdit = () => {
-    setTitle("");
-    setAmount("");
-    setCategory("Food");
-    setDate(today);
-    setEditingId(null);
+    resetForm();
     setMessage("");
   };
 
   return (
     <div className="app-container">
       <main className="tracker-card">
-
         <header className="header">
-          <div className="wallet-icon">▣</div>
+          <div className="wallet-icon">💳</div>
+
           <h1>Personal Expense Tracker</h1>
 
           <div className="total-card">
             <p>Total Spent</p>
+
             <div className="total-amount">
               <span className="rupee-icon">₹</span>
-              ₹{totalSpent.toFixed(2)}
+              <span>₹{totalSpent.toFixed(2)}</span>
             </div>
           </div>
         </header>
@@ -148,12 +187,22 @@ function App() {
                 : "error"
             }`}
           >
-            {message}
-            <button onClick={() => setMessage("")}>×</button>
+            <span>{message}</span>
+
+            <button
+              type="button"
+              onClick={() => setMessage("")}
+              aria-label="Dismiss message"
+            >
+              ×
+            </button>
           </div>
         )}
 
-        <form className="expense-form" onSubmit={handleSubmit}>
+        <form
+          className="expense-form"
+          onSubmit={handleSubmit}
+        >
           <input
             type="text"
             placeholder="Expense Title"
@@ -176,12 +225,11 @@ function App() {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
-            <option>Food</option>
-            <option>Travel</option>
-            <option>Shopping</option>
-            <option>Bills</option>
-            <option>Health</option>
-            <option>Other</option>
+            {categories.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
           </select>
 
           <input
@@ -191,15 +239,19 @@ function App() {
             required
           />
 
-          <button type="submit" className="add-button" disabled={loading}>
+          <button
+            type="submit"
+            className="add-button"
+            disabled={loading}
+          >
             {loading
               ? "Please wait..."
-              : editingId
+              : editingId !== null
               ? "Update Expense"
               : "+ Add Expense"}
           </button>
 
-          {editingId && (
+          {editingId !== null && (
             <button
               type="button"
               className="cancel-button"
@@ -217,13 +269,13 @@ function App() {
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
           >
-            <option>All</option>
-            <option>Food</option>
-            <option>Travel</option>
-            <option>Shopping</option>
-            <option>Bills</option>
-            <option>Health</option>
-            <option>Other</option>
+            <option value="All">All</option>
+
+            {categories.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
           </select>
         </section>
 
@@ -242,14 +294,20 @@ function App() {
             <tbody>
               {loading && expenses.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="empty-message">
+                  <td
+                    colSpan="5"
+                    className="empty-message"
+                  >
                     Loading expenses...
                   </td>
                 </tr>
               ) : filteredExpenses.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="empty-message">
-                    <div className="empty-icon">♧</div>
+                  <td
+                    colSpan="5"
+                    className="empty-message"
+                  >
+                    <div className="empty-icon">📭</div>
                     No expenses found.
                   </td>
                 </tr>
@@ -257,17 +315,22 @@ function App() {
                 filteredExpenses.map((expense) => (
                   <tr key={expense.id}>
                     <td>{expense.title}</td>
+
                     <td className="amount-cell">
                       ₹{Number(expense.amount).toFixed(2)}
                     </td>
+
                     <td>
                       <span className="category-badge">
                         {expense.category}
                       </span>
                     </td>
+
                     <td>{expense.date}</td>
+
                     <td className="action-buttons">
                       <button
+                        type="button"
                         className="edit-button"
                         onClick={() => handleEdit(expense)}
                       >
@@ -275,8 +338,11 @@ function App() {
                       </button>
 
                       <button
+                        type="button"
                         className="delete-button"
-                        onClick={() => handleDelete(expense.id)}
+                        onClick={() =>
+                          handleDelete(expense.id)
+                        }
                       >
                         Delete
                       </button>
@@ -291,7 +357,6 @@ function App() {
         <footer className="footer">
           Manage your money. Track your future.
         </footer>
-
       </main>
     </div>
   );
