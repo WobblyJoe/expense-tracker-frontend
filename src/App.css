@@ -1,50 +1,323 @@
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-  font-family: Arial, sans-serif;
-  background: #f1f5f9;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f0f4fa;
+  color: #263449;
 }
 
-.container {
-  max-width: 1000px;
-  margin: 40px auto;
-  padding: 25px;
-  background: white;
-  border-radius: 12px;
+.app-container {
+  min-height: 100vh;
+  padding: 40px 5%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
-h1 {
+.tracker-card {
+  width: 100%;
+  max-width: 1450px;
+  background: #ffffff;
+  padding: 35px;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(28, 55, 90, 0.08);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.wallet-icon {
+  font-size: 35px;
   color: #2563eb;
+  margin-bottom: 5px;
 }
 
-input, select {
-  padding: 12px;
-  margin: 8px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+.header h1 {
+  font-size: clamp(30px, 4vw, 52px);
+  font-weight: 750;
+  letter-spacing: -1.5px;
+  color: #2563eb;
+  margin-bottom: 22px;
 }
 
-button {
-  padding: 10px 15px;
-  margin: 5px;
+.total-card {
+  width: 390px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  background: linear-gradient(135deg, #142338, #1d3049);
+  color: white;
+  border-radius: 18px;
+  box-shadow: 0 10px 25px rgba(15, 35, 60, 0.2);
+}
+
+.total-card p {
+  font-size: 19px;
+  color: #d3ddeb;
+  margin-bottom: 8px;
+}
+
+.total-amount {
+  font-size: 43px;
+  font-weight: 750;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.rupee-icon {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  background: #2563eb;
+  border-radius: 50%;
+  font-size: 26px;
+}
+
+.message {
+  max-width: 650px;
+  margin: 20px auto;
+  padding: 12px 18px;
+  border-radius: 9px;
+  text-align: center;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.message button {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.success {
+  background: #e9f9ef;
+  color: #078442;
+}
+
+.error {
+  background: #fff0f0;
+  color: #c62828;
+}
+
+.expense-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+  margin: 30px 0;
+}
+
+.expense-form input,
+.expense-form select {
+  flex: 1 1 150px;
+  min-width: 0;
+  height: 60px;
+  padding: 0 18px;
+  border: 1.5px solid #d7dfeb;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #263449;
+  font-size: 16px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.expense-form input:focus,
+.expense-form select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.add-button {
+  height: 60px;
+  padding: 0 25px;
+  border: none;
+  border-radius: 10px;
   background: #2563eb;
   color: white;
-  border: none;
-  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 650;
   cursor: pointer;
+  transition: 0.2s;
+}
+
+.add-button:hover {
+  background: #174fc5;
+  transform: translateY(-2px);
+}
+
+.add-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-button {
+  height: 60px;
+  padding: 0 20px;
+  border: 1px solid #9ca3af;
+  background: white;
+  color: #374151;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.filter-section {
+  text-align: center;
+  margin: 35px 0;
+}
+
+.filter-section h2 {
+  font-size: 22px;
+  color: #64748b;
+  margin-bottom: 18px;
+}
+
+.filter-section select {
+  width: 165px;
+  height: 55px;
+  padding: 0 18px;
+  background: #343434;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e3eaf4;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(20, 40, 70, 0.04);
 }
 
 table {
   width: 100%;
-  margin-top: 25px;
   border-collapse: collapse;
+  min-width: 700px;
+  text-align: center;
 }
 
-th, td {
-  padding: 12px;
-  border: 1px solid #ddd;
+thead {
+  background: #2563eb;
+  color: white;
 }
 
 th {
-  background: #2563eb;
-  color: white;
+  padding: 22px 15px;
+  font-size: 18px;
+  font-weight: 700;
+  border-right: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+td {
+  padding: 18px 12px;
+  border-bottom: 1px solid #edf1f6;
+  font-size: 16px;
+}
+
+tbody tr:hover {
+  background: #f8faff;
+}
+
+.amount-cell {
+  color: #174fc5;
+  font-weight: 700;
+}
+
+.category-badge {
+  display: inline-block;
+  background: #eaf1ff;
+  color: #2563eb;
+  padding: 7px 13px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.action-buttons {
+  white-space: nowrap;
+}
+
+.action-buttons button {
+  padding: 8px 13px;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  margin: 3px;
+  font-weight: 600;
+}
+
+.edit-button {
+  background: #e5efff;
+  color: #2563eb;
+}
+
+.delete-button {
+  background: #ffe9e9;
+  color: #dc2626;
+}
+
+.empty-message {
+  padding: 35px;
+  color: #8492a6;
+  font-size: 18px;
+}
+
+.empty-icon {
+  font-size: 38px;
+  margin-bottom: 8px;
+  color: #94a3b8;
+}
+
+.footer {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 13px;
+  margin-top: 25px;
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    padding: 15px;
+  }
+
+  .tracker-card {
+    padding: 22px 15px;
+  }
+
+  .header h1 {
+    font-size: 30px;
+  }
+
+  .total-amount {
+    font-size: 35px;
+  }
+
+  .expense-form {
+    flex-direction: column;
+  }
+
+  .expense-form input,
+  .expense-form select,
+  .expense-form button {
+    width: 100%;
+    flex: auto;
+  }
 }
